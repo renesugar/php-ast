@@ -7,7 +7,7 @@
 extern zend_module_entry ast_module_entry;
 #define phpext_ast_ptr &ast_module_entry
 
-#define PHP_AST_VERSION "0.1.7dev"
+#define PHP_AST_VERSION "1.0.7dev"
 
 #ifdef PHP_WIN32
 #	define PHP_AST_API __declspec(dllexport)
@@ -21,7 +21,9 @@ extern zend_module_entry ast_module_entry;
 #include "TSRM.h"
 #endif
 
-#define AST_NUM_CACHE_SLOTS (2 * 4)
+// PHP 7.4 added a 3rd cache slot for property_info
+// and expects cache_slot[2] to be null.
+#define AST_NUM_CACHE_SLOTS (3 * 4)
 
 ZEND_BEGIN_MODULE_GLOBALS(ast)
 	void *cache_slots[AST_NUM_CACHE_SLOTS];
@@ -46,6 +48,19 @@ extern ast_str_globals str_globals;
 #define AST_NAME          2048
 #define AST_CLOSURE_VAR   2049
 #define AST_NULLABLE_TYPE 2050
+
+// 544 is already taken by ZEND_AST_GROUP_USE
+#if PHP_VERSION_ID < 70400
+// NOTE: The first hex digit is the number of child nodes a given kind has
+# define ZEND_AST_CLASS_NAME 0x1ff
+# define ZEND_AST_PROP_GROUP 0x2ff
+# define ZEND_AST_ARROW_FUNC 0x5ff
+#endif
+
+#if PHP_VERSION_ID < 80000
+/* NOTE: For list nodes, the first set bit is 0x80 */
+# define ZEND_AST_TYPE_UNION ((1 << (ZEND_AST_IS_LIST_SHIFT + 1)) - 2)
+#endif
 
 /* Pretend it still exists */
 #if PHP_VERSION_ID >= 70100

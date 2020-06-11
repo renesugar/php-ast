@@ -1,7 +1,7 @@
 --TEST--
-Array destructuring
+By-reference array destructuring (PHP 7.3)
 --SKIPIF--
-<?php if (PHP_VERSION_ID < 70100) die('skip PHP >= 7.1 only'); ?>
+<?php if (PHP_VERSION_ID < 70300) die('skip PHP >= 7.3 only'); ?>
 --FILE--
 <?php
 
@@ -9,13 +9,11 @@ require __DIR__ . '/../util.php';
 
 $code = <<<'PHP'
 <?php
-list('foo' => $a, 'bar' => $b) = $x;
-[$a, $b] = $x;
-['foo' => $a, 'bar' => $b] = $x;
-[, [$a]] = $x;
+list($a, &$b) = $c;
+[$a, &$b] = $c;
+$c = [$a, &$b];
 PHP;
-
-echo ast_dump(ast\parse_code($code, $version=50));
+echo ast_dump(ast\parse_code($code, $version=50)), "\n";
 
 ?>
 --EXPECT--
@@ -27,14 +25,14 @@ AST_STMT_LIST
                 flags: 0
                 value: AST_VAR
                     name: "a"
-                key: "foo"
+                key: null
             1: AST_ARRAY_ELEM
-                flags: 0
+                flags: ARRAY_ELEM_REF (1)
                 value: AST_VAR
                     name: "b"
-                key: "bar"
+                key: null
         expr: AST_VAR
-            name: "x"
+            name: "c"
     1: AST_ASSIGN
         var: AST_ARRAY
             flags: ARRAY_SYNTAX_SHORT (3)
@@ -44,40 +42,24 @@ AST_STMT_LIST
                     name: "a"
                 key: null
             1: AST_ARRAY_ELEM
-                flags: 0
+                flags: ARRAY_ELEM_REF (1)
                 value: AST_VAR
                     name: "b"
                 key: null
         expr: AST_VAR
-            name: "x"
+            name: "c"
     2: AST_ASSIGN
-        var: AST_ARRAY
+        var: AST_VAR
+            name: "c"
+        expr: AST_ARRAY
             flags: ARRAY_SYNTAX_SHORT (3)
             0: AST_ARRAY_ELEM
                 flags: 0
                 value: AST_VAR
                     name: "a"
-                key: "foo"
+                key: null
             1: AST_ARRAY_ELEM
-                flags: 0
+                flags: ARRAY_ELEM_REF (1)
                 value: AST_VAR
                     name: "b"
-                key: "bar"
-        expr: AST_VAR
-            name: "x"
-    3: AST_ASSIGN
-        var: AST_ARRAY
-            flags: ARRAY_SYNTAX_SHORT (3)
-            0: null
-            1: AST_ARRAY_ELEM
-                flags: 0
-                value: AST_ARRAY
-                    flags: ARRAY_SYNTAX_SHORT (3)
-                    0: AST_ARRAY_ELEM
-                        flags: 0
-                        value: AST_VAR
-                            name: "a"
-                        key: null
                 key: null
-        expr: AST_VAR
-            name: "x"

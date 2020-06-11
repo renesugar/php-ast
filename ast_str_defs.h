@@ -23,9 +23,9 @@
 	X(offset) \
 	X(label) \
 	X(depth) \
+	X(class) \
 	X(dim) \
 	X(prop) \
-	X(class) \
 	X(args) \
 	X(const) \
 	X(left) \
@@ -35,6 +35,7 @@
 	X(default) \
 	X(cond) \
 	X(declares) \
+	X(props) \
 	X(traits) \
 	X(adaptations) \
 	X(method) \

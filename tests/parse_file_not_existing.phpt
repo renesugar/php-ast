@@ -4,14 +4,14 @@ ast\parse_file() on file that does not exist
 <?php
 
 try {
-    ast\parse_file(__DIR__ . '/non_existing_file.php', $version=40);
+    ast\parse_file(__DIR__ . '/non_existing_file.php', $version=50);
 } catch (RuntimeException $e) {
     echo $e, "\n";
 }
 
 ?>
 --EXPECTF--
-RuntimeException: ast\parse_file(%stests/non_existing_file.php): failed to open stream: No such file or directory in %s:%d
+RuntimeException: ast\parse_file(%stests/non_existing_file.php): %sailed to open stream: No such file or directory in %s:%d
 Stack trace:
 #0 %s(%d): ast\parse_file('%s', %d)
 #1 {main}

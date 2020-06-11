@@ -6,11 +6,11 @@ $strDefsFile = __DIR__ . '/../ast_str_defs.h';
 $code = <<<EOC
 #include "php_ast.h"
 
-const size_t ast_kinds_count = {COUNT};
-
 const zend_ast_kind ast_kinds[] = {
 {KINDS}
 };
+
+const size_t ast_kinds_count = sizeof(ast_kinds) / sizeof(ast_kinds[0]);
 
 const char *ast_kind_to_name(zend_ast_kind kind) {
 \tswitch (kind) {
@@ -57,6 +57,7 @@ $names = [
     'ZEND_AST_FUNC_DECL' => $funcNames,
     'ZEND_AST_CLOSURE' => $funcNames,
     'ZEND_AST_METHOD' => $funcNames,
+    'ZEND_AST_ARROW_FUNC' => $funcNames,
     'ZEND_AST_CLASS' => ['extends', 'implements', 'stmts'],
 
     /* 0 child nodes */
@@ -67,12 +68,9 @@ $names = [
     'ZEND_AST_VAR' => ['name'],
     'ZEND_AST_CONST' => ['name'],
     'ZEND_AST_UNPACK' => ['expr'],
-    'ZEND_AST_UNARY_PLUS' => ['expr'],       // version < 20
-    'ZEND_AST_UNARY_MINUS' => ['expr'],      // version < 20
     'ZEND_AST_CAST' => ['expr'],
     'ZEND_AST_EMPTY' => ['expr'],
     'ZEND_AST_ISSET' => ['var'],
-    'ZEND_AST_SILENCE' => ['expr'],
     'ZEND_AST_SHELL_EXEC' => ['expr'],
     'ZEND_AST_CLONE' => ['expr'],
     'ZEND_AST_EXIT' => ['expr'],
@@ -96,6 +94,7 @@ $names = [
     'ZEND_AST_GOTO' => ['label'],
     'ZEND_AST_BREAK' => ['depth'],
     'ZEND_AST_CONTINUE' => ['depth'],
+    'ZEND_AST_CLASS_NAME' => ['class'],
 
     /* 2 child nodes */
     'ZEND_AST_DIM' => ['expr', 'dim'],
@@ -107,15 +106,10 @@ $names = [
     'ZEND_AST_ASSIGN_REF' => ['var', 'expr'],
     'ZEND_AST_ASSIGN_OP' => ['var', 'expr'],
     'ZEND_AST_BINARY_OP' => ['left', 'right'],
-    'ZEND_AST_GREATER' => ['left', 'right'],       // version < 20
-    'ZEND_AST_GREATER_EQUAL' => ['left', 'right'], // version < 20
-    'ZEND_AST_AND' => ['left', 'right'],           // version < 20
-    'ZEND_AST_OR' => ['left', 'right'],            // version < 20
     'ZEND_AST_ARRAY_ELEM' => ['value', 'key'],
     'ZEND_AST_NEW' => ['class', 'args'],
     'ZEND_AST_INSTANCEOF' => ['expr', 'class'],
     'ZEND_AST_YIELD' => ['value', 'key'],
-    'ZEND_AST_COALESCE' => ['left', 'right'],
 
     'ZEND_AST_STATIC' => ['var', 'default'],
     'ZEND_AST_WHILE' => ['cond', 'stmts'],
@@ -125,6 +119,7 @@ $names = [
     'ZEND_AST_SWITCH_CASE' => ['cond', 'stmts'],
     'ZEND_AST_DECLARE' => ['declares', 'stmts'],
     'ZEND_AST_PROP_ELEM' => ['name', 'default', 'docComment'],
+    'ZEND_AST_PROP_GROUP' => ['type', 'props'],
     'ZEND_AST_CONST_ELEM' => ['name', 'value', 'docComment'],
     'ZEND_AST_USE_TRAIT' => ['traits', 'adaptations'],
     'ZEND_AST_TRAIT_PRECEDENCE' => ['method', 'insteadof'],
@@ -166,6 +161,7 @@ $listNodes = [
 	'ZEND_AST_NAME_LIST',
 	'ZEND_AST_TRAIT_ADAPTATIONS',
 	'ZEND_AST_USE',
+	'ZEND_AST_TYPE_UNION',
 ];
 
 $data = [];
@@ -218,7 +214,6 @@ foreach ($data as $zend_name => $name) {
         . " CONST_CS | CONST_PERSISTENT);";
 }
 
-$code = str_replace('{COUNT}', count($data), $code);
 $code = str_replace('{KINDS}', implode("\n", $kinds), $code);
 $code = str_replace('{STRS}', implode("\n", $strs), $code);
 $code = str_replace('{CONSTS}', implode("\n", $consts), $code);
